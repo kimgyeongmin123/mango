@@ -20,6 +20,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
 
 public class Main1 {
 
@@ -168,6 +169,11 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 			System.out.println("Driver Loading Success!");
 			conn = DriverManager.getConnection(url, id, pw); // 성공하면 Connection객체를 반환
 			System.out.println("DB Connected!");
+			
+			String[] column = { "number", "글쓴이", "글제목", "작성날짜" };
+			Object[][] data = {};
+			DefaultTableModel model = new DefaultTableModel(data, column);
+		
 			//쿼리문
 			pstmt = conn.prepareStatement("select * from tbl_게시판");
 
@@ -176,15 +182,28 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 			if (rs != null) {
 				
 				while (rs.next()) {
-					String get_number = rs.getString("number");
+					Object[] rowData = {rs.getInt("number"),rs.getString("글쓴이"),
+							rs.getString("글제목"),rs.getString("작성날짜")};
+					model.addRow(rowData);
 					System.out.print(rs.getString("number") + " ");
 					System.out.print(rs.getString("글쓴이") + " ");
 					System.out.print(rs.getString("글제목") + " ");
-					System.out.print(rs.getString("글내용") + " ");
 					System.out.print(rs.getString("작성날짜") + "\n");
 				}
 			}
+			
+			JTable table = new JTable(model);
+			JScrollPane scroll = new JScrollPane(table);
+			scroll.setBounds(10, 130, 860, 200);
+			
+			table.getColumnModel().getColumn(0).setMaxWidth(50);
+			table.getColumnModel().getColumn(1).setMaxWidth(200);
+			table.getColumnModel().getColumn(2).setMaxWidth(1000);
+			table.getColumnModel().getColumn(3).setMaxWidth(400);
 
+			
+			panel.add(scroll);
+			panel.setLayout(null);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -204,6 +223,8 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 				e.printStackTrace();
 			}
 		}
+		
+			
 
 	}
 

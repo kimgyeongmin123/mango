@@ -21,12 +21,15 @@ import java.util.UUID;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+
+import com.google.common.collect.Table;
 
 class GUI extends JFrame implements ActionListener, KeyListener {
 	JButton btn1;
@@ -35,10 +38,10 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 	JButton btn4;
 	JButton btn5;
 	JButton btn6;
-	JTextField txt1;	//텍스트입력
+	JTextField txt1;
 
-	JTextArea area1;
 	JTextField txt2;
+	JTextArea area1;
 	JScrollPane scroll1;
 
 	// DB INSERT FRAME_WINDOW
@@ -47,7 +50,7 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 	JFrame Frm_Delete;
 	JFrame Frm_Select;
 
-	// 연결정보 저장용 변수
+	// DB연결정보 저장용 변수
 	String id = "root";
 	String pw = "1234";
 	String url = "jdbc:mysql://localhost:3306/tmpdb";
@@ -117,16 +120,17 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
-		
+
+		// DB Connection
 		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");//드라이브 적재
-			System.out.println("드라이브에 적재하였습니다.");
-			conn = DriverManager.getConnection(url,id,pw);
-			System.out.println("커넥션이 성공하였습니다.");
+			Class.forName("com.mysql.cj.jdbc.Driver"); // 드라이브 적재
+			System.out.println("Driver Loading Success..");
+			conn = DriverManager.getConnection(url, id, pw);
+			System.out.println("DB Connected..");
 		} catch (Exception e) {
 			e.printStackTrace();
-		}	
-		 
+		}
+
 	}
 
 	@Override
@@ -189,28 +193,66 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 			System.out.println("DB_INSERT");
 			if (Frm_Insert == null) {
 
+				// 프레임창 생성
 				Frm_Insert = new JFrame("DB_INSERT");
 				Frm_Insert.setBounds(650, 100, 300, 400);
 
 				// Panel객체 생성
 				JPanel panel = new JPanel();
 
-				// Component추가
+				// Component객체 생성
 				JTextArea area = new JTextArea();
 				JScrollPane scroll = new JScrollPane(area);
 				JButton btn = new JButton("INSERT");
 
-				//Position지정
-				scroll.setBounds(10, 10, 100, 100);
-				btn.setBounds(10, 120, 100, 30);
-				
-				//Component를 Panel에 추가
+				// Position지정
+				scroll.setBounds(10, 10, 250, 250);
+				btn.setBounds(10, 270, 100, 30);
+
+				// btn_EVENT
+				btn.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						System.out.println("INSERT_BTN");
+
+						// pstmt객체 sql쿼리 저장
+						try {
+							pstmt = conn.prepareStatement("insert into tbl_memo values(null,?,now())");
+							pstmt.setString(1, area.getText());
+							int result = pstmt.executeUpdate();
+							if (result > 0) {
+								JOptionPane.showMessageDialog(null, "INSERT성공", "DBCONN",
+										JOptionPane.INFORMATION_MESSAGE);
+								Frm_Insert.setVisible(false); // 프레임창닫기
+							} else {
+								JOptionPane.showMessageDialog(null, "INSERT실패", "DBCONN", JOptionPane.ERROR_MESSAGE);
+								Frm_Insert.setVisible(false); // 프레임창닫기
+							}
+
+							// pstmt.executeUpdate() DB 저장
+							// 자원정리
+						} catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} finally {
+							try {
+								pstmt.close();
+							} catch (Exception e1) {
+								e1.printStackTrace();
+							}
+						}
+
+					}
+				});
+
+				// Component를 Panel에 추가
 				panel.add(scroll);
 				panel.add(btn);
-				
-				//Panel Layout설정
-				panel.setLayout(null);
 
+				// Panel Layout설정
+
+				panel.setLayout(null);
 				// Frame에 panel추가
 				Frm_Insert.getContentPane().add(panel);
 
@@ -218,13 +260,11 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 				Frm_Insert.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				Frm_Insert.setVisible(true);
 
-				Frm_Insert.getContentPane().setLayout(null);
 			} else {
 				Frm_Insert.setVisible(true);
 			}
 
 			// JTextArea의 내용을 메모를 가져와서 tbl_memo 저장한다
-			
 
 		} else if (e.getSource() == btn4) {
 			// DB_UPDATE
@@ -234,36 +274,78 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 
 				Frm_Update = new JFrame("DB_UPDATE");
 				Frm_Update.setBounds(650, 100, 300, 400);
-				
-				//--------------------------------
-				
+		
+				//----------------------------------------------
 				// Panel객체 생성
 				JPanel panel = new JPanel();
 
 				// Component객체 생성
-				
-				JTextField txt = new JTextField();
+				JTextField txt= new JTextField("No");
 				JTextArea area = new JTextArea();
 				JScrollPane scroll = new JScrollPane(area);
 				JButton btn = new JButton("UPDATE");
 
-				//Position지정
+				// Position지정
 				txt.setBounds(10,10,80,30);
 				scroll.setBounds(10, 50, 250, 200);
 				btn.setBounds(10, 270, 100, 30);
 				
-				//Component를 Panel에 추가	
-				panel.add(txt);			//이렇게 패널을 추가해야 보이게 뜬다.
+				
+				// btn_EVENT
+				btn.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						System.out.println("UPDATE_BTN");
+
+						// pstmt객체 sql쿼리 저장
+						try {
+							pstmt = conn.prepareStatement("update tbl_memo set contents=?,regdate=now() where no=?");
+							pstmt.setString(1, area.getText());
+							pstmt.setInt(2,   Integer.parseInt(txt.getText()) );
+							int result = pstmt.executeUpdate();
+							if (result > 0) {
+								JOptionPane.showMessageDialog(null, "UPDATE성공", "DBCONN",
+										JOptionPane.INFORMATION_MESSAGE);
+								Frm_Update.setVisible(false); // 프레임창닫기
+							} else {
+								JOptionPane.showMessageDialog(null, "UPDATE실패", "DBCONN", JOptionPane.ERROR_MESSAGE);
+								Frm_Update.setVisible(false); // 프레임창닫기
+							}
+
+							// pstmt.executeUpdate() DB 저장
+							// 자원정리
+						} catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} finally {
+							try {
+								pstmt.close();
+							} catch (Exception e1) {
+								e1.printStackTrace();
+							}
+						}
+
+					}
+				});
+				
+				
+				
+				// Component를 Panel에 추가
+				panel.add(txt);
 				panel.add(scroll);
 				panel.add(btn);
-				
-				//Panel Layout설정
-				panel.setLayout(null);
 
+				// Panel Layout설정
+
+				panel.setLayout(null);
 				// Frame에 panel추가
-				Frm_Update.getContentPane().add(panel);
+				Frm_Update.getContentPane().add(panel);				
 				
-				//------------------------------------------------
+				
+				
+				//----------------------------------------------
+				
 				
 				// X 버튼 누를때 setVisible(false)로 설정됨
 				Frm_Update.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -282,8 +364,83 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 			if (Frm_Delete == null) {
 
 				Frm_Delete = new JFrame("DB_DELETE");
-				Frm_Delete.setBounds(650, 100, 300, 400);
+				Frm_Delete.setBounds(650, 100, 300, 200);
 				// X 버튼 누를때 setVisible(false)로 설정됨
+				
+				//---------------------------------------
+				
+				// Panel객체 생성
+				JPanel panel = new JPanel();
+
+				// Component객체 생성
+				JTextField txt= new JTextField("No");
+				JTextArea area = new JTextArea();
+				 
+				JButton btn = new JButton("DELETE");
+
+				// Position지정
+				txt.setBounds(10,10,100,30); 
+				btn.setBounds(10, 50, 100, 30);
+				
+				
+				// btn_EVENT
+				btn.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						System.out.println("DELETE_BTN");
+
+						// pstmt객체 sql쿼리 저장
+						try {
+							pstmt = conn.prepareStatement("delete from tbl_memo where no=?");
+							pstmt.setInt(1, Integer.parseInt(txt.getText()));
+							
+							int result = pstmt.executeUpdate();
+							if (result > 0) {
+								JOptionPane.showMessageDialog(null, "DELETE성공", "DBCONN",
+										JOptionPane.INFORMATION_MESSAGE);
+								Frm_Delete.setVisible(false); // 프레임창닫기
+							} else {
+								JOptionPane.showMessageDialog(null, "DELETE실패", "DBCONN", JOptionPane.ERROR_MESSAGE);
+								Frm_Delete.setVisible(false); // 프레임창닫기
+							}
+
+							// pstmt.executeUpdate() DB 저장
+							// 자원정리
+						} catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} finally {
+							try {
+								pstmt.close();
+							} catch (Exception e1) {
+								e1.printStackTrace();
+							}
+						}
+
+					}
+				});
+				
+				
+				
+				// Component를 Panel에 추가
+				panel.add(txt);
+				panel.add(btn);
+
+				// Panel Layout설정
+
+				panel.setLayout(null);
+				// Frame에 panel추가
+				Frm_Delete.getContentPane().add(panel);		
+				
+				
+				
+				
+				
+				
+				
+				//---------------------------------------
+				
 				Frm_Delete.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				Frm_Delete.setVisible(true);
 			} else {
@@ -294,80 +451,77 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 			// DB_SELECT
 			System.out.println("DB_SELECT");
 
-			if (Frm_Select == null) {
+//			if (Frm_Select == null) {
 
 				Frm_Select = new JFrame("DB_SELECT");
 				Frm_Select.setBounds(650, 100, 400, 400);
-				
-				//Table구조만들기
-				String[] column = {"no","Contents","RegDate"};
-				Object[][] data = {
-						{"1","뛰어내릴까","haha"},
-						{"2","옥기",":)"},
-						{"3","골기","ㅇㅅㅇ"},
-						{"4","바보멍충이다","ㅇㅂㅇ"}
-				};
-				DefaultTableModel model = new DefaultTableModel(data,column);
-				
-				//Component 생성
+
+				// Panel생성
 				JPanel panel = new JPanel();
-				JTable table = new JTable(model);
-				JScrollPane scroll = new JScrollPane(table);
-				scroll.setBounds(10,10,350,330);
+
+		
+
+				// Table구조만들기
+				String[] column = { "No", "Contents", "RegDate" };
+				Object[][] data = {};
+				DefaultTableModel model = new DefaultTableModel(data, column);
+				 
 				
-				//tbl_memo로부터 데이터가져오기
+
+				// tbl_memo로부터 데이터 가져오기
 				try {
-					pstmt = conn.prepareStatement("select * from tbl_memo");	//전달할 쿼리문 지정
-					rs = pstmt.executeQuery();	//쿼리문을 rs로 받는다.
-					if(rs!=null)	//rs가 쿼리문을 똑바로 받았을 시
+					pstmt = conn.prepareStatement("select * from tbl_memo");
+					rs=pstmt.executeQuery();
+					if(rs!=null)
 					{
 						while(rs.next())
 						{
 							Object[] rowData = {rs.getInt("no"),rs.getString("contents"),rs.getString("regdate")};
 							model.addRow(rowData);
-							System.out.println(rs.getInt("no")+" ");
-							System.out.println(rs.getString("contents")+" ");
-							System.out.println(rs.getString("regdate")+"\n");
+							System.out.print(rs.getInt("no")+" ");
+							System.out.print(rs.getString("contents")+" ");
+							System.out.print(rs.getString("regdate")+"\n");		
 						}
 					}
-					
 				} catch (Exception e1) {
 					e1.printStackTrace();
-				}finally
-				{
-					try {
-						rs.close();
-					} catch (SQLException e1) {
-						e1.printStackTrace();
-					}
-					try {
-						pstmt.close();
-					} catch (SQLException e1) {
-						e1.printStackTrace();
-					}
+				}finally {
+					try{rs.close();}catch(Exception e1) {e1.printStackTrace();}
+					try{pstmt.close();}catch(Exception e1) {e1.printStackTrace();}
 				}
 				
 				
 				
-				table.getColumnModel().getColumn(0).setPreferredWidth(1);
-				table.getColumnModel().getColumn(1).setPreferredWidth(200);
-				table.getColumnModel().getColumn(2).setPreferredWidth(10);
 				
-				//Component를 Panel에 추가 & Layout
+				// Component생성
+				JTable table = new JTable(model);
+				JScrollPane scroll = new JScrollPane(table);
+				scroll.setBounds(10, 10, 350, 330);
+				
+				 
+				
+
+				// Table 열의 크기지정
+				table.getColumnModel().getColumn(0).setMaxWidth(25);
+//				table.getColumnModel().getColumn(1).setMaxWidth();
+				table.getColumnModel().getColumn(2).setMaxWidth(150);
+
+				// Component를 Panel에 추가&Layout
 				panel.add(scroll);
 				panel.setLayout(null);
-				
-				//Frame에 Panel추가
+
+				// Frame에 Panel추가
 				Frm_Select.getContentPane().add(panel);
-				
+
 				// X 버튼 누를때 setVisible(false)로 설정됨
 				Frm_Select.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				Frm_Select.setVisible(true);
+
 			} else {
 				Frm_Select.setVisible(true);
 			}
 
-		}
+//		}
 
 	}
 

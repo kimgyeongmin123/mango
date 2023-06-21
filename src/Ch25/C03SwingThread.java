@@ -91,11 +91,7 @@ class C01GUI extends JFrame implements ActionListener,KeyListener
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource()==btn1) {
 			//스레드1 시작
-			
-			while(true) {
-				area1.append("Thread1.......\n");
-				try {Thread.sleep(500);}catch(Exception e1){e1.printStackTrace();}
-			}
+			C03Worker1 worker = new C03Worker1(this);
 		}
 		
 		if(e.getSource()==btn2) {
