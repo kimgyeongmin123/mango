@@ -24,9 +24,12 @@ public class C02Server {
 		
 		while(true)
 		{
+			//수신
 			recv = din.readUTF();
 			if(recv.equals("q")||recv==null) break;	//리시브가 q이거나 받은내용이 없으면 브레이크
 			System.out.println("[Client] "+recv); 	//클라이언트에게 받은 내용 출력
+			
+			//송신
 			System.out.print("[Server(q:종료)] ");
 			send = sc.nextLine();
 			dout.writeUTF(send);

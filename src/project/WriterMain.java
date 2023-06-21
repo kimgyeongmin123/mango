@@ -1,15 +1,21 @@
 package project;
 
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.FocusTraversalPolicy;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -38,6 +44,12 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 	JTextField txt3;
 	JTextArea area1;
 	JScrollPane scroll1;
+	
+//	JLabel lbl1;
+//	JLabel lbl2;
+//	JLabel lbl3;
+	
+	
 //	연결정보 저장용 변수
 	String id="root";
 	String pw="1234";
@@ -63,24 +75,32 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 		btn1 = new JButton("저장");
 		btn2 = new JButton("수정");
 		btn3 = new JButton("나가기");
-		txt1 = new JTextField("닉네임 : ");
-		txt2 = new JTextField("제목 : ");
-		txt3 = new JTextField("내용 : ");
+		txt1 = new JTextField("이름");
+		txt2 = new JTextField("제목");
+		txt3 = new JTextField("내용");
 		area1 = new JTextArea();
+		
+//		lbl1 = new JLabel("닉네임 : ");
+//		lbl2 = new JLabel("제목 : ");
+//		lbl3 = new JLabel("내용 : ");
 		// area1.setBounds(10,90,210,300);
 		scroll1 = new JScrollPane(area1);
 
 		// Positioning
-		txt1.setBounds(15, 15, 300, 40); // 전
+		txt1.setBounds(40, 15, 300, 40); // 전
 //		txt1.setBounds(730, 70, 235, 40); // 후
-		txt2.setBounds(15, 70, 700, 40);
-		txt3.setBounds(15, 125, 950, 570);
+		txt2.setBounds(40, 70, 700, 40);
+		txt3.setBounds(40, 125, 950, 570);
 
 		btn1.setBounds(770, 10, 90, 30); // 저장
 		btn2.setBounds(870, 10, 90, 30); // 수정
 		btn3.setBounds(870, 700, 90, 30); // 나가기
+		
+//		lbl1.setBounds(getBounds());
+//		lbl2.setBounds(getBounds());
+//		lbl3.setBounds(getBounds());
 
-		scroll1.setBounds(15, 125, 950, 570);
+		scroll1.setBounds(40, 125, 950, 570);
 
 		// Event처리
 		btn1.addActionListener(this);
@@ -90,6 +110,52 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 		txt2.addKeyListener(this);
 		txt3.addKeyListener(this);
 		
+		txt1.addFocusListener(new FocusListener() {
+		    @Override
+		    public void focusGained(FocusEvent e) {
+		        if (txt1.getText().equals("이름")) {
+		            txt1.setText("");
+		        }
+		    }
+
+		    @Override
+		    public void focusLost(FocusEvent e) {
+		        if (txt1.getText().isEmpty()) {
+		            txt1.setText("이름");
+		        }
+		    }
+		});
+		txt2.addFocusListener(new FocusListener() {
+		    @Override
+		    public void focusGained(FocusEvent e) {
+		        if (txt2.getText().equals("제목")) {
+		            txt2.setText("");
+		        }
+		    }
+
+		    @Override
+		    public void focusLost(FocusEvent e) {
+		        if (txt2.getText().isEmpty()) {
+		            txt2.setText("제목");
+		        }
+		    }
+		});
+		txt3.addFocusListener(new FocusListener() {
+		    @Override
+		    public void focusGained(FocusEvent e) {
+		        if (txt3.getText().equals("내용")) {
+		            txt3.setText("");
+		        }
+		    }
+
+		    @Override
+		    public void focusLost(FocusEvent e) {
+		        if (txt3.getText().isEmpty()) {
+		            txt3.setText("내용");
+		        }
+		    }
+		});
+
 		btn1.addActionListener(new ActionListener() {
 			
 			@Override
@@ -166,7 +232,42 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 				
 			}
 		});
+	    List<Component> tabOrder = new ArrayList<>();  //tap키 순서 지정
+	    tabOrder.add(txt1);
+	    tabOrder.add(txt2);
+	    tabOrder.add(txt3);
+	    tabOrder.add(btn1);
+	    tabOrder.add(btn2);
+	    tabOrder.add(btn3);
 
+	    setFocusTraversalPolicy(new FocusTraversalPolicy() {
+	        @Override
+	        public Component getComponentAfter(Container container, Component component) {
+	            int index = tabOrder.indexOf(component);
+	            return tabOrder.get((index + 1) % tabOrder.size());
+	        }
+
+	        @Override
+	        public Component getComponentBefore(Container container, Component component) {
+	            int index = tabOrder.indexOf(component);
+	            return tabOrder.get((index - 1 + tabOrder.size()) % tabOrder.size());
+	        }
+
+	        @Override
+	        public Component getFirstComponent(Container container) {
+	            return tabOrder.get(0);
+	        }
+
+	        @Override
+	        public Component getLastComponent(Container container) {
+	            return tabOrder.get(tabOrder.size() - 1);
+	        }
+
+	        @Override
+	        public Component getDefaultComponent(Container container) {
+	            return tabOrder.get(0);
+	        }
+	    });
 		
 		btn1.setFont(new Font("굴림",Font.BOLD,12));
 		btn2.setFont(new Font("굴림",Font.BOLD,12));		
@@ -182,6 +283,10 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 		panel.add(txt3);
 //				panel.add(area1);
 		panel.add(scroll1);
+		
+//		panel.add(lbl1);
+//		panel.add(lbl2);
+//		panel.add(lbl3);
 
 		// Frame
 		add(panel); // 프레임에 panel추가
@@ -192,30 +297,18 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 
 
 	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void keyTyped(KeyEvent e) {}
 
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void keyPressed(KeyEvent e) {}
 
 
 	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void keyReleased(KeyEvent e) {}
 
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void actionPerformed(ActionEvent e) {}
 
 }
