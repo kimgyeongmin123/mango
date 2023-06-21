@@ -1,10 +1,14 @@
-package 게시판;
+package project;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -34,6 +38,15 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 	JTextField txt3;
 	JTextArea area1;
 	JScrollPane scroll1;
+//	연결정보 저장용 변수
+	String id="root";
+	String pw="1234";
+	String url="jdbc:mysql://localhost:3306/게시판";
+	
+//	JDBC참조변수
+	Connection conn = null;				//DB연결용 참조변수
+	PreparedStatement pstmt = null;		//SQL쿼리 전송용 참조변수
+	ResultSet rs = null;				//SQL쿼리 결과(SELECT결과)수신용 참조변수
 
 
 	GUI1() {
@@ -50,9 +63,9 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 		btn1 = new JButton("저장");
 		btn2 = new JButton("수정");
 		btn3 = new JButton("나가기");
-		txt1 = new JTextField();
-		txt2 = new JTextField();
-		txt3 = new JTextField();
+		txt1 = new JTextField("닉네임 : ");
+		txt2 = new JTextField("제목 : ");
+		txt3 = new JTextField("내용 : ");
 		area1 = new JTextArea();
 		// area1.setBounds(10,90,210,300);
 		scroll1 = new JScrollPane(area1);
@@ -81,15 +94,27 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				area1.append("내가 무엇을 적었을까");
-				
-			}
-		});
-		btn1.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {		//btn1 클릭 시 저장
 				JOptionPane.showMessageDialog(null, "저장하실?");
+				try {
+					Class.forName("com.mysql.cj.jdbc.Driver");	//드라이버 적재
+					System.out.println("Driver Loading Success..");
+					conn = DriverManager.getConnection(url,id,pw);
+					System.out.println("DB Connected..");
+					pstmt = conn.prepareStatement("insert into tbl_게시판 values(null,?,?,?,now())");
+					pstmt.setString(1, txt1.getText());
+					pstmt.setString(2, txt2.getText());
+					pstmt.setString(3, txt3.getText());
+					int result = pstmt.executeUpdate();
+					
+				}catch(Exception e1) {
+					e1.printStackTrace();
+				}finally {
+					try {pstmt.close();}catch(Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+				dispose();
+				
 			}
 		});
 		
@@ -98,6 +123,32 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {		//btn2 클릭 시 수정
 				JOptionPane.showMessageDialog(null, "수정하실?");
+				try {
+					Class.forName("com.mysql.cj.jdbc.Driver"); // 드라이버 적재
+					System.out.println("Driver Loading Success..");
+					conn = DriverManager.getConnection(url, id, pw);
+					System.out.println("DB Connected..");
+					pstmt = conn.prepareStatement("update tbl_게시판 set 글쓴이=?, 글제목 = ?,작성날짜=now() where 글내용=?");
+					pstmt.setString(1, txt1.getText());
+					pstmt.setString(2, txt2.getText());
+					pstmt.setString(3, txt3.getText());
+					int result = pstmt.executeUpdate();
+				
+					if(result>0) {
+						JOptionPane.showMessageDialog(null, "UPDATE성공", "DBCONN",
+								JOptionPane.INFORMATION_MESSAGE);
+						setVisible(false); // 프레임창닫기
+
+					}
+					else {
+						JOptionPane.showMessageDialog(null, "UPDATE실패", "DBCONN", JOptionPane.ERROR_MESSAGE);
+						setVisible(false); // 프레임창닫기
+					}
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				} finally {
+					try {pstmt.close();} catch (Exception e1) {e1.printStackTrace();}
+				}
 			}
 		});
 		
@@ -107,7 +158,8 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 			public void actionPerformed(ActionEvent e) {		//btn3 클릭 시 돌아가기
 				JOptionPane.showMessageDialog(null, "나가실?");
                 dispose(); // 현재 GUI 창 닫기
-                new GUI(); // GUI1으로 돌아가기
+                
+//                new GUI(); // GUI1으로 돌아가기
 				
 				
 
@@ -121,7 +173,7 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 		btn3.setFont(new Font("굴림",Font.BOLD,12));
 		
 		
-		// Add_Panel_Component
+// 		Add_Panel_Component
 		panel.add(btn1);
 		panel.add(btn2);
 		panel.add(btn3);
