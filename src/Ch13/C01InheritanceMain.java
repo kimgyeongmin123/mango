@@ -18,6 +18,7 @@ class Point2D
 	Point2D()
 	{
 		System.out.println("Point2D 생성자 호출!");
+		System.out.println();
 	}
 	
 	@Override

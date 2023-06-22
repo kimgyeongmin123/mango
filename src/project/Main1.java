@@ -146,7 +146,7 @@ class Main_GUI extends JFrame implements ActionListener, KeyListener {
 //		panel.add(scroll2);
 
 		panel.add(srch);
-
+ 
 		// Frame
 		add(panel); // 프레임에 panel추가
 
