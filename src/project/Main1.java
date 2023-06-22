@@ -5,7 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -26,12 +27,12 @@ import javax.swing.table.DefaultTableModel;
 public class Main1 {
 
 	public static void main(String[] args) {
-		new GUI();
+		new Main_GUI();
 	}
 
 }
 
-class GUI extends JFrame implements ActionListener, KeyListener {
+class Main_GUI extends JFrame implements ActionListener, KeyListener {
 	JButton btn1;
 	JButton btn2;
 //	JButton btn3;
@@ -46,7 +47,9 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 	JScrollPane scroll1;
 	JScrollPane scroll2;
 
-	GUI() {
+	DefaultTableModel model;
+
+	Main_GUI() {
 		// Frame
 		super("다 같이 게시판");
 		setBounds(100, 100, 900, 900);
@@ -92,7 +95,8 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new GUI1();
+				new WriterMain_GUI();
+				dispose();
 			}
 		}); // 글작성
 
@@ -100,7 +104,8 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new GUI2();
+				new MyWriter_GUI();
+				dispose();
 			}
 		});
 //		btn2.addActionListener(this);		//내가 쓴 글
@@ -113,9 +118,7 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 				System.exit(0);
 			}
 		});
-		
-		
-		
+
 		tbl1.addKeyListener(this);
 		area1.setEditable(false);
 
@@ -136,7 +139,7 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 
 //		panel.add(tbl1);
 //		panel.add(tbl2);
-		panel.add(txt3);	//다 같이 게시판 제목
+		panel.add(txt3); // 다 같이 게시판 제목
 
 //			panel.add(area1);
 //		panel.add(scroll1);	//게시물 목록뜰 때 더블클릭 안되게 할 수 있음
@@ -168,13 +171,13 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 
 			String[] column = { "No", "글쓴이", "글제목", "작성날짜" };
 			Object[][] data = {};
-			
-			DefaultTableModel model = new DefaultTableModel(data,column) {
-				
+
+			model = new DefaultTableModel(data, column) {
+
 				public boolean isCellEditable(int i, int c) {
 					return false;
-				} 
-				
+				}
+
 			};
 
 			// 쿼리문
@@ -206,12 +209,27 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 
 			panel.add(scroll);
 			panel.setLayout(null);
-			
-			
-			
+
+			// JTable 마우스 클릭 시 이벤트 처리
+			table.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					int selectedRow = table.getSelectedRow();
+					int selectedColumn = table.getSelectedColumn();
+
+					// 선택한 셀의 데이터 가져오기
+					Object selectedData = table.getValueAt(selectedRow, selectedColumn);
+					System.out.println("선택한 데이터: " + selectedData);
+
+					
+				}
+			});
+
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
+		}
+
+		finally {
 			try {
 				rs.close();
 			} catch (SQLException e) {
@@ -231,18 +249,20 @@ class GUI extends JFrame implements ActionListener, KeyListener {
 
 	}
 
-	
+	@Override
+	public void keyTyped(KeyEvent e) {
+	}
 
 	@Override
-	public void keyTyped(KeyEvent e) {}
+	public void keyPressed(KeyEvent e) {
+	}
 
 	@Override
-	public void keyPressed(KeyEvent e) {}
+	public void keyReleased(KeyEvent e) {
+	}
 
 	@Override
-	public void keyReleased(KeyEvent e) {}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {}
+	public void actionPerformed(ActionEvent e) {
+	}
 
 }
