@@ -29,13 +29,13 @@ import javax.swing.JTextField;
 public class WriterMain {
 
 	public static void main(String[] args) {
-		new GUI1();
+		new WriterMain_GUI();
 
 	}
 
 }
 
-class GUI1 extends JFrame implements ActionListener, KeyListener {
+class WriterMain_GUI extends JFrame implements ActionListener, KeyListener {
 	JButton btn1;
 	JButton btn2;
 	JButton btn3;
@@ -61,7 +61,7 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 	ResultSet rs = null;				//SQL쿼리 결과(SELECT결과)수신용 참조변수
 
 
-	GUI1() {
+	WriterMain_GUI() {
 		// Frame
 		super("글쓰기");
 		setBounds(100, 100, 1000, 800);
@@ -160,6 +160,7 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
 				JOptionPane.showMessageDialog(null, "저장하실?");
 				try {
 					Class.forName("com.mysql.cj.jdbc.Driver");	//드라이버 적재
@@ -179,6 +180,7 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 						e1.printStackTrace();
 					}
 				}
+				new Main_GUI();
 				dispose();
 				
 			}
@@ -225,7 +227,7 @@ class GUI1 extends JFrame implements ActionListener, KeyListener {
 				JOptionPane.showMessageDialog(null, "나가실?");
                 dispose(); // 현재 GUI 창 닫기
                 
-//                new GUI(); // GUI1으로 돌아가기
+                new Main_GUI(); // GUI1으로 돌아가기
 				
 				
 
